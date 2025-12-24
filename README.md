@@ -37,6 +37,20 @@ npm run deploy
 # or similar package manager command
 ```
 
+## GitHub Actions (Deploy to Workers)
+
+This repo includes a GitHub Actions workflow that deploys to Cloudflare Workers on `push` to `main`.
+
+Required repository secrets (GitHub → Settings → Secrets and variables → Actions):
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+Notes:
+
+- The Worker name is configured in `wrangler.jsonc` as `lldc`.
+- The workflow runs `pnpm run deploy` (OpenNext build + Wrangler deploy).
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
