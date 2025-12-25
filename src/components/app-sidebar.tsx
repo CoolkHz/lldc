@@ -109,12 +109,12 @@ const data = {
   documents: [
     {
       name: "我的订单",
-      url: "#",
+      url: "/dashboard/orders",
       icon: IconDatabase,
     },
     {
       name: "往期开奖",
-      url: "#",
+      url: "/dashboard/draws",
       icon: IconReport,
     },
   ],
