@@ -34,7 +34,22 @@
 	],
 	"observability": {
 		"enabled": true
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "lldc-db",
+			"database_id": "d15d4969-5d6f-4290-af44-8f13dbcdbc65",
+			"remote": true
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "LOTTERY_KV",
+			"id": "85212d20359842979b545a177be3088f",
+			"remote": true
+		}
+	]
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

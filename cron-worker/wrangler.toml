@@ -1,0 +1,13 @@
+name = "lldc-cron"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+# Asia/Taipei 08:00 == UTC 00:00
+crons = ["0 0 * * *"]
+
+[[services]]
+binding = "TARGET_WORKER"
+service = "lldc"
+

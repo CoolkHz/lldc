@@ -33,12 +33,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
+type MeResponse = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
+    linuxdoUserId: string
+    nickname: string
+    avatarUrl: string
+  }
+  isAdmin: boolean
+}
+
+const data = {
   navMain: [
     {
       title: "Dashboard",
@@ -151,6 +155,34 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [me, setMe] = React.useState<MeResponse | null>(null)
+
+  React.useEffect(() => {
+    const ac = new AbortController()
+    void (async () => {
+      try {
+        const res = await fetch("/api/auth/me", { signal: ac.signal, credentials: "include" })
+        if (res.status === 401) {
+          window.location.replace("/login")
+          return
+        }
+        if (!res.ok) {
+          setMe(null)
+          return
+        }
+        const json = (await res.json()) as unknown
+        if (!json || typeof json !== "object") {
+          setMe(null)
+          return
+        }
+        setMe(json as MeResponse)
+      } catch {
+        setMe(null)
+      }
+    })()
+    return () => ac.abort()
+  }, [])
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -174,7 +206,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={me?.user ?? null} isAdmin={me?.isAdmin ?? false} />
       </SidebarFooter>
     </Sidebar>
   )

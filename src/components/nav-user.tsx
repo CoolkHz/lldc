@@ -5,6 +5,7 @@ import {
   IconDotsVertical,
   IconLogout,
   IconNotification,
+  IconLogin,
   IconUserCircle,
 } from "@tabler/icons-react"
 
@@ -31,14 +32,21 @@ import {
 
 export function NavUser({
   user,
+  isAdmin,
 }: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
+  user: { linuxdoUserId: string; nickname: string; avatarUrl: string } | null
+  isAdmin: boolean
 }) {
   const { isMobile } = useSidebar()
+
+  async function logout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" })
+    } catch {
+      // ignore
+    }
+    window.location.href = "/login"
+  }
 
   return (
     <SidebarMenu>
@@ -50,13 +58,15 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage src={user?.avatarUrl ?? ""} alt={user?.nickname ?? "未登录"} />
+                <AvatarFallback className="rounded-lg">
+                  {(user?.nickname ?? "LD").slice(0, 2).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user ? user.nickname : "未登录"}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
+                  {user ? `ID ${user.linuxdoUserId}${isAdmin ? " · 管理员" : ""}` : "请先登录"}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -71,37 +81,55 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage src={user?.avatarUrl ?? ""} alt={user?.nickname ?? "未登录"} />
+                  <AvatarFallback className="rounded-lg">
+                    {(user?.nickname ?? "LD").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{user ? user.nickname : "未登录"}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {user ? `ID ${user.linuxdoUserId}${isAdmin ? " · 管理员" : ""}` : "请先登录"}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Account
+            {user ? (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem disabled>
+                    <IconUserCircle />
+                    LinuxDO 用户
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled>
+                    <IconCreditCard />
+                    积分支付
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled>
+                    <IconNotification />
+                    通知（未启用）
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    void logout()
+                  }}
+                >
+                  <IconLogout />
+                  退出登录
+                </DropdownMenuItem>
+              </>
+            ) : (
+              <DropdownMenuItem asChild>
+                <a href="/login">
+                  <IconLogin />
+                  去登录
+                </a>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconLogout />
-              Log out
-            </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
