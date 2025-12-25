@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { HttpError, isHttpError, toPublicErrorMessage } from "@/lib/errors/http"
+import { HttpError, isHttpError, toPublicErrorCode, toPublicErrorMessage } from "@/lib/errors/http"
 
 export async function readJson(req: Request): Promise<unknown> {
   try {
@@ -36,9 +36,13 @@ export function html(body: string, init?: ResponseInit) {
 
 export function errorToResponse(error: unknown) {
   if (isHttpError(error)) {
-    return json({ error: toPublicErrorMessage(error) }, { status: error.status })
+    if (error.status >= 500) {
+      console.error("[api] HttpError>=500", { status: error.status, code: error.code, message: error.message, cause: error.cause })
+    }
+    return json({ error: toPublicErrorMessage(error), code: toPublicErrorCode(error) }, { status: error.status })
   }
-  return json({ error: "Internal Server Error" }, { status: 500 })
+  console.error("[api] Unhandled error", error)
+  return json({ error: "Internal Server Error", code: "INTERNAL_SERVER_ERROR" }, { status: 500 })
 }
 
 export function getBearerToken(req: Request): string | undefined {
@@ -48,4 +52,3 @@ export function getBearerToken(req: Request): string | undefined {
   if (type?.toLowerCase() !== "bearer") return undefined
   return token?.trim() || undefined
 }
-

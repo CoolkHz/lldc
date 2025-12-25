@@ -123,11 +123,11 @@ pnpm db:apply:remote
 
 Key：
 
-- `lottery:${CACHE_VERSION}:dashboard:${drawId}`（30s）
-- `lottery:${CACHE_VERSION}:pool:${drawId}`（20s）
+- `lottery:${CACHE_VERSION}:dashboard:${drawId}`（>=60s）
+- `lottery:${CACHE_VERSION}:pool:${drawId}`（>=60s）
 - `lottery:${CACHE_VERSION}:draws:list:${limit}:${cursorOr0}`（600s）
 - `lottery:${CACHE_VERSION}:draw:${drawId}:detail`（86400s）
-- `lottery:${CACHE_VERSION}:participants:${drawId}:${limit}:${cursorOr0}`（30s）
+- `lottery:${CACHE_VERSION}:participants:${drawId}:${limit}:${cursorOr0}`（>=60s）
 
 失效：
 
@@ -182,7 +182,7 @@ curl -i "http://localhost:3000/api/credit/notify?pid=YOUR_PID&trade_no=T123&out_
 ### 4) dashboard
 
 ```bash
-curl -s "http://localhost:3000/api/lottery/dashboard"
+curl -s "http://localhost:3000/api/lottery/dashboard?drawId=2025-01-01"
 ```
 
 ### 5) 我的订单列表

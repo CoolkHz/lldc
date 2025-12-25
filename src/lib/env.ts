@@ -107,14 +107,14 @@ export function getEnv(): EnvContext {
   const cacheVersion = getOptionalEnvString(env as unknown as Record<string, unknown>, "CACHE_VERSION") ?? "v1"
   const cacheTtls: CacheTtls = {
     dashboardSeconds:
-      getOptionalInt(env as unknown as Record<string, unknown>, "CACHE_TTL_DASHBOARD") ?? 30,
-    poolSeconds: getOptionalInt(env as unknown as Record<string, unknown>, "CACHE_TTL_POOL") ?? 20,
+      getOptionalInt(env as unknown as Record<string, unknown>, "CACHE_TTL_DASHBOARD") ?? 60,
+    poolSeconds: getOptionalInt(env as unknown as Record<string, unknown>, "CACHE_TTL_POOL") ?? 60,
     drawsListSeconds:
       getOptionalInt(env as unknown as Record<string, unknown>, "CACHE_TTL_DRAWS_LIST") ?? 600,
     drawDetailSeconds:
       getOptionalInt(env as unknown as Record<string, unknown>, "CACHE_TTL_DRAW_DETAIL") ?? 86400,
     participantsSeconds:
-      getOptionalInt(env as unknown as Record<string, unknown>, "CACHE_TTL_PARTICIPANTS") ?? 30,
+      getOptionalInt(env as unknown as Record<string, unknown>, "CACHE_TTL_PARTICIPANTS") ?? 60,
   }
 
   const config: AppConfig = {

@@ -1,12 +1,20 @@
 type KvTtl = { ttlSeconds: number }
 
+const MIN_KV_TTL_SECONDS = 60
+
+function normalizeKvTtlSeconds(ttlSeconds: number): number {
+  const ttl = Math.trunc(ttlSeconds)
+  if (!Number.isFinite(ttl) || ttl <= 0) return MIN_KV_TTL_SECONDS
+  return Math.max(ttl, MIN_KV_TTL_SECONDS)
+}
+
 export async function getJson<T>(kv: KVNamespace, key: string): Promise<T | undefined> {
   const value = await kv.get<T>(key, { type: "json" })
   return value ?? undefined
 }
 
 export async function setJson(kv: KVNamespace, key: string, value: unknown, options: KvTtl) {
-  await kv.put(key, JSON.stringify(value), { expirationTtl: options.ttlSeconds })
+  await kv.put(key, JSON.stringify(value), { expirationTtl: normalizeKvTtlSeconds(options.ttlSeconds) })
 }
 
 export async function del(kv: KVNamespace, key: string) {
@@ -32,4 +40,3 @@ export function drawDetailKey(cacheVersion: string, drawId: string) {
 export function participantsKey(cacheVersion: string, drawId: string, limit: number, cursorOr0: number) {
   return `lottery:${cacheVersion}:participants:${drawId}:${limit}:${cursorOr0}`
 }
-

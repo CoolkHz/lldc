@@ -3,20 +3,16 @@
 import * as React from "react"
 import {
   IconCamera,
-  IconChartBar,
   IconDashboard,
   IconDatabase,
   IconFileAi,
   IconFileDescription,
   IconFileWord,
-  IconFolder,
   IconHelp,
   IconInnerShadowTop,
-  IconListDetails,
   IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -45,74 +41,54 @@ type MeResponse = {
 const data = {
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
+      title: "抽奖面板",
+      url: "/dashboard",
       icon: IconDashboard,
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
     },
   ],
   navClouds: [
     {
-      title: "Capture",
+      title: "功能",
       icon: IconCamera,
       isActive: true,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "本期概览",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "参与者排行",
           url: "#",
         },
       ],
     },
     {
-      title: "Proposal",
+      title: "订单",
       icon: IconFileDescription,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "我的订单",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "订单详情",
           url: "#",
         },
       ],
     },
     {
-      title: "Prompts",
+      title: "开奖记录",
       icon: IconFileAi,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "往期开奖",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "开奖详情",
           url: "#",
         },
       ],
@@ -120,34 +96,34 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: "设置（未启用）",
       url: "#",
       icon: IconSettings,
     },
     {
-      title: "Get Help",
+      title: "帮助（未启用）",
       url: "#",
       icon: IconHelp,
     },
     {
-      title: "Search",
+      title: "搜索（未启用）",
       url: "#",
       icon: IconSearch,
     },
   ],
   documents: [
     {
-      name: "Data Library",
+      name: "数据（占位）",
       url: "#",
       icon: IconDatabase,
     },
     {
-      name: "Reports",
+      name: "报表（占位）",
       url: "#",
       icon: IconReport,
     },
     {
-      name: "Word Assistant",
+      name: "助手（占位）",
       url: "#",
       icon: IconFileWord,
     },
@@ -194,7 +170,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">Lucky Ldc.</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -128,7 +128,7 @@ export async function listParticipantsCached(params: {
     .from(orders)
     .where(and(eq(orders.drawId, params.drawId), eq(orders.status, "paid")))
     .groupBy(orders.linuxdoUserId, orders.userNicknameSnapshot, orders.userAvatarSnapshot)
-    .orderBy(desc(sql`ticketCount`))
+    .orderBy(desc(sql<number>`sum(${orders.ticketCount})`))
     .limit(params.limit)
     .offset(params.cursor)
     .all()
