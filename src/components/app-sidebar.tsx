@@ -96,36 +96,26 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "设置（未启用）",
+      title: "设置",
       url: "#",
       icon: IconSettings,
     },
     {
-      title: "帮助（未启用）",
+      title: "帮助",
       url: "#",
       icon: IconHelp,
-    },
-    {
-      title: "搜索（未启用）",
-      url: "#",
-      icon: IconSearch,
     },
   ],
   documents: [
     {
-      name: "数据（占位）",
+      name: "我的订单",
       url: "#",
       icon: IconDatabase,
     },
     {
-      name: "报表（占位）",
+      name: "往期开奖",
       url: "#",
       icon: IconReport,
-    },
-    {
-      name: "助手（占位）",
-      url: "#",
-      icon: IconFileWord,
     },
   ],
 }
