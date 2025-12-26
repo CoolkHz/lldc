@@ -6,10 +6,6 @@ import { buildEpayFields, renderAutoSubmitForm } from "@/lib/credit/epay"
 import { getEffectiveOrderStatus } from "@/lib/lottery/order"
 import { getOrderByOutTradeNo } from "@/repositories/orders.repo"
 
-function getOrigin(req: Request): string {
-  return new URL(req.url).origin
-}
-
 export async function POST(req: Request, ctx: { params: Promise<{ outTradeNo: string }> }) {
   try {
     const { db, config } = getEnv()
@@ -24,18 +20,14 @@ export async function POST(req: Request, ctx: { params: Promise<{ outTradeNo: st
     const effectiveStatus = getEffectiveOrderStatus(order.status, order.createdAt, now)
     if (effectiveStatus !== "pending") throw new HttpError(400, "订单状态不可支付")
 
-    const origin = getOrigin(req)
-    const notifyUrl = config.credit.notifyUrl ?? `${origin}/api/credit/notify`
-    const returnUrl = config.credit.returnUrl ?? `${origin}/dashboard`
-
     const fields = buildEpayFields({
       pid: config.credit.pid,
       creditKey: config.credit.key,
       outTradeNo: order.outTradeNo,
       name: `lottery:${order.drawId}`,
       money: String(order.moneyPoints),
-      notifyUrl,
-      returnUrl,
+      notifyUrl: config.credit.notifyUrl,
+      returnUrl: config.credit.returnUrl,
     })
 
     const payHtml = renderAutoSubmitForm({ actionUrl: config.credit.submitUrl, fields })

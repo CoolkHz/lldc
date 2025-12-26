@@ -20,10 +20,6 @@ function parseTicketNumber(provided: unknown): string {
   return trimmed
 }
 
-function getOrigin(req: Request): string {
-  return new URL(req.url).origin
-}
-
 export async function createOrderAndRenderPayForm(params: {
   req: Request
   db: DbClient
@@ -65,18 +61,14 @@ export async function createOrderAndRenderPayForm(params: {
     payload: { outTradeNo, drawId, ticketCount: params.ticketCount, moneyPoints },
   })
 
-  const origin = getOrigin(params.req)
-  const notifyUrl = params.config.credit.notifyUrl ?? `${origin}/api/credit/notify`
-  const returnUrl = params.config.credit.returnUrl ?? `${origin}/dashboard`
-
   const fields = buildEpayFields({
     pid: params.config.credit.pid,
     creditKey: params.config.credit.key,
     outTradeNo,
     name: `lottery:${drawId}`,
     money: String(moneyPoints),
-    notifyUrl,
-    returnUrl,
+    notifyUrl: params.config.credit.notifyUrl,
+    returnUrl: params.config.credit.returnUrl,
   })
 
   const html = renderAutoSubmitForm({ actionUrl: params.config.credit.submitUrl, fields })
