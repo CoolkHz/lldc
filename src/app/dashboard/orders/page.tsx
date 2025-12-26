@@ -111,7 +111,18 @@ export default function Page() {
         cell: ({ row }) => {
           const o = row.original
           const expired = isOrderExpired(o.createdAt)
-          const canPay = getEffectiveOrderStatus(o.status, o.createdAt) === "pending" && !expired
+          const effectiveStatus = getEffectiveOrderStatus(o.status, o.createdAt)
+          const canPay = effectiveStatus === "pending" && !expired
+          const label =
+            paying === o.outTradeNo
+              ? "跳转中..."
+              : expired
+                ? "已超时"
+                : effectiveStatus === "paid"
+                  ? "已支付"
+                  : effectiveStatus === "canceled"
+                    ? "已取消"
+                    : "去支付"
           return (
             <Button
               size="sm"
@@ -119,7 +130,7 @@ export default function Page() {
               disabled={!canPay || paying === o.outTradeNo}
               onClick={() => pay(o.outTradeNo)}
             >
-              {paying === o.outTradeNo ? "跳转中..." : "去支付"}
+              {label}
             </Button>
           )
         },
