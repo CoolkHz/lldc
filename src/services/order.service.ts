@@ -81,6 +81,15 @@ export async function handleCreditNotify(params: {
   kv: KVNamespace
   config: AppConfig
 }) {
+  function getD1Changes(result: unknown): number | undefined {
+    if (!result || typeof result !== "object") return undefined
+    const r = result as { changes?: unknown; meta?: unknown }
+    if (typeof r.changes === "number") return r.changes
+    const meta = r.meta as { changes?: unknown } | undefined
+    if (meta && typeof meta === "object" && typeof meta.changes === "number") return meta.changes
+    return undefined
+  }
+
   const url = new URL(params.req.url)
   const qp = url.searchParams
 
@@ -92,30 +101,23 @@ export async function handleCreditNotify(params: {
   const outTradeNo = payload.out_trade_no
   const tradeNo = payload.trade_no
 
-  try {
-    const pid = payload.pid
-    const money = payload.money
-    const tradeStatus = payload.trade_status
-    const sign = payload.sign
-    const signType = payload.sign_type
+  const pid = payload.pid
+  const money = payload.money
+  const tradeStatus = payload.trade_status
+  const sign = payload.sign
+  const signType = payload.sign_type
 
+  try {
     if (!pid || !tradeNo || !outTradeNo || !money || !tradeStatus || !sign || !signType) {
       throw new HttpError(400, "回调参数缺失")
     }
     if (pid !== params.config.credit.pid) throw new HttpError(400, "pid 不匹配")
     if (signType !== "MD5") throw new HttpError(400, "sign_type 不支持")
-
     if (!verifyMd5Lower(payload, params.config.credit.key, sign)) {
       throw new HttpError(400, "签名校验失败")
     }
-
     if (tradeStatus !== "TRADE_SUCCESS") {
-      await addAuditEvent(params.db, {
-        type: "credit_notify_ignored",
-        refId: outTradeNo ?? "unknown",
-        payload: { out_trade_no: outTradeNo, trade_no: tradeNo, trade_status: tradeStatus, money },
-      })
-      return { outTradeNo, updated: false, ignored: true }
+      throw new HttpError(400, `trade_status 非成功：${tradeStatus}`)
     }
 
     const paidAt = Math.floor(Date.now() / 1000)
@@ -128,14 +130,18 @@ export async function handleCreditNotify(params: {
         throw new HttpError(400, "money 与订单不一致")
       }
 
-      // 幂等点：条件更新成功才插入 tickets；若更新行数=0（已 paid），必须直接返回且不重复插票。
+      if (order.status === "paid") {
+        return { updated: false, alreadyPaid: true, drawId: order.drawId }
+      }
+
+      // 幂等点：条件更新成功才插入 tickets；若更新行数=0，视为失败（或已 paid）；避免重复插票。
       const updateResult = await markOrderPaidIfPending(tx as unknown as DbClient, {
         outTradeNo,
         tradeNo,
         paidAtUnixSeconds: paidAt,
       })
-      const updated = (updateResult as unknown as { changes?: number }).changes === 1
-      if (!updated) return { updated: false, drawId: order.drawId }
+      const updated = getD1Changes(updateResult) === 1
+      if (!updated) throw new HttpError(409, "订单状态更新失败")
 
       if (!/^\d{4}$/.test(order.number)) throw new HttpError(500, "订单 number 异常")
       if (!Number.isInteger(order.ticketCount) || order.ticketCount <= 0) throw new HttpError(500, "订单 ticketCount 异常")
@@ -154,15 +160,15 @@ export async function handleCreditNotify(params: {
         payload: { outTradeNo, tradeNo, moneyPoints: order.moneyPoints },
       })
 
-      return { updated: true, drawId: order.drawId }
+      return { updated: true, alreadyPaid: false, drawId: order.drawId }
     })
 
     if (result.updated) {
       await invalidateLotteryCaches(params.kv, params.config, result.drawId)
     }
-    return { outTradeNo, updated: result.updated }
+
+    return { outTradeNo, updated: result.updated, alreadyPaid: result.alreadyPaid }
   } catch (error) {
-    // 失败处理：避免对方重试风暴，仍返回 success；同时记录审计以便排查。
     const message = error instanceof Error ? error.message : String(error)
     try {
       await addAuditEvent(params.db, {
@@ -173,6 +179,6 @@ export async function handleCreditNotify(params: {
     } catch {
       // ignore
     }
-    return { outTradeNo: outTradeNo ?? "unknown", updated: false, error: true }
+    throw error
   }
 }
