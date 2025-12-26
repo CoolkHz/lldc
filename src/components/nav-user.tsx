@@ -28,7 +28,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/animate-ui/components/radix/sidebar"
 
 export function NavUser({
   user,

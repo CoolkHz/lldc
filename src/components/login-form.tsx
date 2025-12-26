@@ -1,7 +1,7 @@
 import { GalleryVerticalEnd } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/animate-ui/components/buttons/button"
 import {
   FieldDescription,
   FieldGroup,

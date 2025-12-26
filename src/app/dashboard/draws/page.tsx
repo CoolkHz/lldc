@@ -97,23 +97,21 @@ export default function Page() {
                 </Card>
               ) : null}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>往期开奖</CardTitle>
-                  <CardDescription>仅展示最近 20 期</CardDescription>
-                </CardHeader>
-                <CardContent className="px-0">
-                  {data ? (
-                    <DataTable data={data.items} columns={columns} emptyText="暂无开奖记录" />
-                  ) : (
-                    <div className="space-y-2 px-6">
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <CardHeader>
+                <CardTitle>往期开奖</CardTitle>
+                <CardDescription>仅展示最近 20 期</CardDescription>
+              </CardHeader>
+              <CardContent className="px-0">
+                {data ? (
+                  <DataTable data={data.items} columns={columns} emptyText="暂无开奖记录" />
+                ) : (
+                  <div className="space-y-2 px-6">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                )}
+              </CardContent>
             </div>
           </div>
         </div>

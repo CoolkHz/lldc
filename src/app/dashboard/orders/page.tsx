@@ -5,7 +5,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 
 import { DataTable } from "@/components/data-table"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/animate-ui/components/buttons/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SiteHeader } from "@/components/site-header"
@@ -184,23 +184,21 @@ export default function Page() {
                 </Card>
               ) : null}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>我的订单</CardTitle>
-                  <CardDescription>仅展示最近 20 笔</CardDescription>
-                </CardHeader>
-                <CardContent className="px-0">
-                  {data ? (
-                    <DataTable data={data.items} columns={columns} emptyText="暂无订单" />
-                  ) : (
-                    <div className="space-y-2 px-6">
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <CardHeader>
+                <CardTitle>我的订单</CardTitle>
+                <CardDescription>仅展示最近 10 笔</CardDescription>
+              </CardHeader>
+              <CardContent className="px-0">
+                {data ? (
+                  <DataTable data={data.items} columns={columns} emptyText="暂无订单" />
+                ) : (
+                  <div className="space-y-2 px-6">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                )}
+              </CardContent>
             </div>
           </div>
         </div>

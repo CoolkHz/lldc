@@ -23,7 +23,7 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/animate-ui/components/buttons/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

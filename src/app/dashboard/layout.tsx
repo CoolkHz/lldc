@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react"
 
 import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/animate-ui/components/radix/sidebar"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (

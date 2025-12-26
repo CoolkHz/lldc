@@ -1,8 +1,8 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/animate-ui/components/buttons/button"
 import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarTrigger } from "@/components/animate-ui/components/radix/sidebar"
 
 export function SiteHeader({
   title = "抽奖面板",
