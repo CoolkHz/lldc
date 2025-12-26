@@ -257,7 +257,7 @@ function SidebarTrigger({
   className,
   onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: Omit<React.ComponentProps<typeof Button>, "asChild" | "children">) {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -271,6 +271,7 @@ function SidebarTrigger({
         onClick?.(event)
         toggleSidebar()
       }}
+      asChild={false}
       {...props}
     >
       <PanelLeftIcon />
