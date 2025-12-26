@@ -75,7 +75,7 @@ export function getSalesWindowUtcSeconds(drawId: string): { salesStartTs: number
   const startLocal = { year, month, day: day - 1, hour: 8, minute: 0, second: 0 }
   const endLocal = { year, month, day, hour: 7, minute: 59, second: 59 }
 
-  // 注意：台北无夏令时，固定 UTC+8；这里以固定偏移换算到 UTC 秒。
+  // 注意：北京无夏令时，固定 UTC+8；这里以固定偏移换算到 UTC 秒。
   return {
     salesStartTs: taipeiLocalToUtcSeconds(startLocal),
     salesEndTs: taipeiLocalToUtcSeconds(endLocal),

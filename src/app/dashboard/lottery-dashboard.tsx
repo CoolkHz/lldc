@@ -163,13 +163,13 @@ export function LotteryDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>本期信息</CardTitle>
-            <CardDescription>台北时间 08:00 开奖</CardDescription>
+            <CardDescription>北京时间 08:00 开奖</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {dashboard ? (
               <>
                 <div className="text-sm">
-                  <div className="text-muted-foreground">销售窗口（台北）</div>
+                  <div className="text-muted-foreground">销售窗口</div>
                   <div className="font-medium">
                     {formatTaipei(dashboard.draw.salesStartTs)} ~ {formatTaipei(dashboard.draw.salesEndTs)}
                   </div>

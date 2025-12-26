@@ -71,7 +71,7 @@ const columns: Array<ColumnDef<MyOrdersResponse["items"][number], unknown>> = [
   {
     id: "创建时间",
     accessorKey: "createdAt",
-    header: "创建时间（台北）",
+    header: "创建时间",
     cell: ({ row }) => <span className="text-xs">{formatTaipei(row.original.createdAt)}</span>,
   },
 ]

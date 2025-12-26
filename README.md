@@ -218,7 +218,7 @@ curl -i "http://localhost:3000/api/draw/run" \
 
 目录：`cron-worker/`
 
-- `cron-worker/wrangler.toml` 已配置 `0 0 * * *`（UTC）触发，即台北 08:00
+- `cron-worker/wrangler.toml` 已配置 `0 0 * * *`（UTC）触发，即北京 08:00
 - 通过 service binding `TARGET_WORKER` 调用主 Worker 的 `/api/draw/run`
 
 部署 cron worker 前，请为 cron worker 单独设置 `DRAW_RUN_TOKEN` secret，并确保 `TARGET_WORKER` 指向主 worker（`lldc`）。

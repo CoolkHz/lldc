@@ -48,7 +48,7 @@ const columns: Array<ColumnDef<DrawsListResponse["items"][number], unknown>> = [
   {
     id: "销售截止",
     accessorKey: "salesEndTs",
-    header: "销售截止（台北）",
+    header: "销售截止",
     cell: ({ row }) => <span className="text-xs">{formatTaipei(row.original.salesEndTs)}</span>,
   },
   {
