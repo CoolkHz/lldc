@@ -2,6 +2,7 @@ import { json, errorToResponse } from "@/app/api/_helpers"
 import { getEnv } from "@/lib/env"
 import { requireAuthContext } from "@/lib/auth/requireUser"
 import { HttpError } from "@/lib/errors/http"
+import { getEffectiveOrderStatus } from "@/lib/lottery/order"
 import { getOrderByOutTradeNo } from "@/repositories/orders.repo"
 import { listTicketsByOrder } from "@/repositories/tickets.repo"
 
@@ -18,8 +19,10 @@ export async function GET(req: Request, ctx: { params: Promise<{ outTradeNo: str
       throw new HttpError(403, "无权限")
     }
 
-    const ticketList = order.status === "paid" ? await listTicketsByOrder(db, outTradeNo) : []
-    return json({ order, tickets: ticketList })
+    const now = Math.floor(Date.now() / 1000)
+    const effectiveStatus = getEffectiveOrderStatus(order.status, order.createdAt, now)
+    const ticketList = effectiveStatus === "paid" ? await listTicketsByOrder(db, outTradeNo) : []
+    return json({ order: { ...order, status: effectiveStatus }, tickets: ticketList })
   } catch (error) {
     return errorToResponse(error)
   }

@@ -1,0 +1,772 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "76796cb2-13e8-4911-ae24-b343f1e5febe",
+  "prevId": "a350117f-333d-4acd-808b-568c3ce4f796",
+  "tables": {
+    "audit_events": {
+      "name": "audit_events",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ref_id": {
+          "name": "ref_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "payload_json": {
+          "name": "payload_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "unixepoch()"
+        }
+      },
+      "indexes": {
+        "idx_audit_type": {
+          "name": "idx_audit_type",
+          "columns": [
+            "type"
+          ],
+          "isUnique": false
+        },
+        "idx_audit_ref": {
+          "name": "idx_audit_ref",
+          "columns": [
+            "ref_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "draws": {
+      "name": "draws",
+      "columns": {
+        "draw_id": {
+          "name": "draw_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sales_start_ts": {
+          "name": "sales_start_ts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sales_end_ts": {
+          "name": "sales_end_ts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "winning": {
+          "name": "winning",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "gross_points": {
+          "name": "gross_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "linuxdo_fee_points": {
+          "name": "linuxdo_fee_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "net_points": {
+          "name": "net_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "operator_fee_points": {
+          "name": "operator_fee_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "p1_points": {
+          "name": "p1_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "p2_points": {
+          "name": "p2_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "p3_points": {
+          "name": "p3_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "carry_over_points": {
+          "name": "carry_over_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "seed_hash": {
+          "name": "seed_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "seed_reveal": {
+          "name": "seed_reveal",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "seed_pending": {
+          "name": "seed_pending",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tickets_hash": {
+          "name": "tickets_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "unixepoch()"
+        }
+      },
+      "indexes": {
+        "idx_draws_status": {
+          "name": "idx_draws_status",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        },
+        "idx_draws_sales_end": {
+          "name": "idx_draws_sales_end",
+          "columns": [
+            "sales_end_ts"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "orders": {
+      "name": "orders",
+      "columns": {
+        "out_trade_no": {
+          "name": "out_trade_no",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "trade_no": {
+          "name": "trade_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "draw_id": {
+          "name": "draw_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "linuxdo_user_id": {
+          "name": "linuxdo_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_nickname_snapshot": {
+          "name": "user_nickname_snapshot",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_avatar_snapshot": {
+          "name": "user_avatar_snapshot",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ticket_count": {
+          "name": "ticket_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "unit_price_points": {
+          "name": "unit_price_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 10
+        },
+        "money_points": {
+          "name": "money_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "number": {
+          "name": "number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'0'"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "bonus_points": {
+          "name": "bonus_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "unixepoch()"
+        },
+        "paid_at": {
+          "name": "paid_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "unixepoch()"
+        }
+      },
+      "indexes": {
+        "uq_orders_trade_no": {
+          "name": "uq_orders_trade_no",
+          "columns": [
+            "trade_no"
+          ],
+          "isUnique": true
+        },
+        "idx_orders_draw": {
+          "name": "idx_orders_draw",
+          "columns": [
+            "draw_id"
+          ],
+          "isUnique": false
+        },
+        "idx_orders_user": {
+          "name": "idx_orders_user",
+          "columns": [
+            "linuxdo_user_id"
+          ],
+          "isUnique": false
+        },
+        "idx_orders_status": {
+          "name": "idx_orders_status",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "orders_draw_id_draws_draw_id_fk": {
+          "name": "orders_draw_id_draws_draw_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "draws",
+          "columnsFrom": [
+            "draw_id"
+          ],
+          "columnsTo": [
+            "draw_id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "orders_linuxdo_user_id_users_linuxdo_user_id_fk": {
+          "name": "orders_linuxdo_user_id_users_linuxdo_user_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "users",
+          "columnsFrom": [
+            "linuxdo_user_id"
+          ],
+          "columnsTo": [
+            "linuxdo_user_id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "payouts": {
+      "name": "payouts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "draw_id": {
+          "name": "draw_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ticket_id": {
+          "name": "ticket_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "out_trade_no": {
+          "name": "out_trade_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "linuxdo_user_id": {
+          "name": "linuxdo_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tier": {
+          "name": "tier",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amount_points": {
+          "name": "amount_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "unixepoch()"
+        },
+        "paid_at": {
+          "name": "paid_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_payouts_draw": {
+          "name": "idx_payouts_draw",
+          "columns": [
+            "draw_id"
+          ],
+          "isUnique": false
+        },
+        "idx_payouts_user": {
+          "name": "idx_payouts_user",
+          "columns": [
+            "linuxdo_user_id"
+          ],
+          "isUnique": false
+        },
+        "idx_payouts_status": {
+          "name": "idx_payouts_status",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "payouts_draw_id_draws_draw_id_fk": {
+          "name": "payouts_draw_id_draws_draw_id_fk",
+          "tableFrom": "payouts",
+          "tableTo": "draws",
+          "columnsFrom": [
+            "draw_id"
+          ],
+          "columnsTo": [
+            "draw_id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "payouts_ticket_id_tickets_id_fk": {
+          "name": "payouts_ticket_id_tickets_id_fk",
+          "tableFrom": "payouts",
+          "tableTo": "tickets",
+          "columnsFrom": [
+            "ticket_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payouts_out_trade_no_orders_out_trade_no_fk": {
+          "name": "payouts_out_trade_no_orders_out_trade_no_fk",
+          "tableFrom": "payouts",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "out_trade_no"
+          ],
+          "columnsTo": [
+            "out_trade_no"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payouts_linuxdo_user_id_users_linuxdo_user_id_fk": {
+          "name": "payouts_linuxdo_user_id_users_linuxdo_user_id_fk",
+          "tableFrom": "payouts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "linuxdo_user_id"
+          ],
+          "columnsTo": [
+            "linuxdo_user_id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "tickets": {
+      "name": "tickets",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "draw_id": {
+          "name": "draw_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "out_trade_no": {
+          "name": "out_trade_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "linuxdo_user_id": {
+          "name": "linuxdo_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "number": {
+          "name": "number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ticket_count": {
+          "name": "ticket_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "prize_tier": {
+          "name": "prize_tier",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "payout_points": {
+          "name": "payout_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "unixepoch()"
+        }
+      },
+      "indexes": {
+        "idx_tickets_draw": {
+          "name": "idx_tickets_draw",
+          "columns": [
+            "draw_id"
+          ],
+          "isUnique": false
+        },
+        "idx_tickets_order": {
+          "name": "idx_tickets_order",
+          "columns": [
+            "out_trade_no"
+          ],
+          "isUnique": false
+        },
+        "idx_tickets_user": {
+          "name": "idx_tickets_user",
+          "columns": [
+            "linuxdo_user_id"
+          ],
+          "isUnique": false
+        },
+        "idx_tickets_tier": {
+          "name": "idx_tickets_tier",
+          "columns": [
+            "prize_tier"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tickets_draw_id_draws_draw_id_fk": {
+          "name": "tickets_draw_id_draws_draw_id_fk",
+          "tableFrom": "tickets",
+          "tableTo": "draws",
+          "columnsFrom": [
+            "draw_id"
+          ],
+          "columnsTo": [
+            "draw_id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "tickets_out_trade_no_orders_out_trade_no_fk": {
+          "name": "tickets_out_trade_no_orders_out_trade_no_fk",
+          "tableFrom": "tickets",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "out_trade_no"
+          ],
+          "columnsTo": [
+            "out_trade_no"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "tickets_linuxdo_user_id_users_linuxdo_user_id_fk": {
+          "name": "tickets_linuxdo_user_id_users_linuxdo_user_id_fk",
+          "tableFrom": "tickets",
+          "tableTo": "users",
+          "columnsFrom": [
+            "linuxdo_user_id"
+          ],
+          "columnsTo": [
+            "linuxdo_user_id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "linuxdo_user_id": {
+          "name": "linuxdo_user_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nickname": {
+          "name": "nickname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "unixepoch()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "unixepoch()"
+        }
+      },
+      "indexes": {
+        "idx_users_nickname": {
+          "name": "idx_users_nickname",
+          "columns": [
+            "nickname"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

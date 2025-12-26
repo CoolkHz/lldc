@@ -4,24 +4,20 @@ import type { DbClient } from "@/lib/db/client"
 import { buildEpayFields, renderAutoSubmitForm } from "@/lib/credit/epay"
 import { verifyMd5Lower } from "@/lib/credit/sign"
 import { getCurrentDrawId } from "@/lib/lottery/time"
-import { randomTicketNumber, randomOutTradeNo } from "@/lib/lottery/random"
+import { randomOutTradeNo } from "@/lib/lottery/random"
 import { addAuditEvent } from "@/repositories/audit.repo"
 import { createOrder, getOrderByOutTradeNo, markOrderPaidIfPending } from "@/repositories/orders.repo"
-import { insertTicketsForOrder } from "@/repositories/tickets.repo"
+import { insertTicketForOrder } from "@/repositories/tickets.repo"
 import { ensureDraw, invalidateLotteryCaches } from "@/services/draw.service"
 
 const UNIT_PRICE_POINTS = 10
 const MAX_TICKETS_PER_ORDER = 200
 
-function parseTicketNumbers(ticketCount: number, provided?: unknown): string[] {
-  if (!provided) return Array.from({ length: ticketCount }, () => randomTicketNumber())
-  if (!Array.isArray(provided)) throw new HttpError(400, "numbers 必须为数组")
-  if (provided.length !== ticketCount) throw new HttpError(400, "numbers 数量必须与 ticketCount 一致")
-  const numbers = provided.map((n) => String(n))
-  for (const n of numbers) {
-    if (!/^\d{4}$/.test(n)) throw new HttpError(400, `无效号码：${n}`)
-  }
-  return numbers
+function parseTicketNumber(provided: unknown): string {
+  if (typeof provided !== "string") throw new HttpError(400, "number 必须为字符串")
+  const trimmed = provided.trim()
+  if (!/^\d{4}$/.test(trimmed)) throw new HttpError(400, "number 必须为 4 位数字（0000-9999）")
+  return trimmed
 }
 
 function getOrigin(req: Request): string {
@@ -34,7 +30,7 @@ export async function createOrderAndRenderPayForm(params: {
   config: AppConfig
   user: { linuxdoUserId: string; nickname: string; avatarUrl: string }
   ticketCount: number
-  numbers?: unknown
+  number: unknown
 }) {
   if (!Number.isInteger(params.ticketCount) || params.ticketCount <= 0) {
     throw new HttpError(400, "ticketCount 必须为正整数")
@@ -46,7 +42,7 @@ export async function createOrderAndRenderPayForm(params: {
   const drawId = getCurrentDrawId()
   await ensureDraw(params.db, drawId)
 
-  const numbers = parseTicketNumbers(params.ticketCount, params.numbers)
+  const number = parseTicketNumber(params.number)
   const moneyPoints = params.ticketCount * UNIT_PRICE_POINTS
   const outTradeNo = randomOutTradeNo(`d${drawId.replaceAll("-", "")}`)
 
@@ -59,7 +55,7 @@ export async function createOrderAndRenderPayForm(params: {
     ticketCount: params.ticketCount,
     unitPricePoints: UNIT_PRICE_POINTS,
     moneyPoints,
-    numbersJson: JSON.stringify(numbers),
+    number,
   })
   if (!order) throw new HttpError(500, "创建订单失败")
 
@@ -149,16 +145,15 @@ export async function handleCreditNotify(params: {
       const updated = (updateResult as unknown as { changes?: number }).changes === 1
       if (!updated) return { updated: false, drawId: order.drawId }
 
-      const numbers = JSON.parse(order.numbersJson) as unknown
-      if (!Array.isArray(numbers) || numbers.some((n) => typeof n !== "string")) {
-        throw new HttpError(500, "订单 numbers_json 异常")
-      }
+      if (!/^\d{4}$/.test(order.number)) throw new HttpError(500, "订单 number 异常")
+      if (!Number.isInteger(order.ticketCount) || order.ticketCount <= 0) throw new HttpError(500, "订单 ticketCount 异常")
 
-      await insertTicketsForOrder(tx as unknown as DbClient, {
+      await insertTicketForOrder(tx as unknown as DbClient, {
         drawId: order.drawId,
         outTradeNo,
         linuxdoUserId: order.linuxdoUserId,
-        numbers: numbers as string[],
+        number: order.number,
+        ticketCount: order.ticketCount,
       })
 
       await addAuditEvent(tx as unknown as DbClient, {

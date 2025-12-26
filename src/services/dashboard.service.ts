@@ -86,7 +86,7 @@ export async function getDrawDetailCached(params: { db: DbClient; kv: KVNamespac
   const counts = await params.db
     .select({
       tier: tickets.prizeTier,
-      count: sql<number>`count(*)`,
+      count: sql<number>`coalesce(sum(${tickets.ticketCount}), 0)`,
     })
     .from(tickets)
     .where(eq(tickets.drawId, params.drawId))

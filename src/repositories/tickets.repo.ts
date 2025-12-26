@@ -3,19 +3,18 @@ import { and, desc, eq, inArray } from "drizzle-orm"
 import { tickets } from "@/db/schema"
 import type { DbClient } from "@/lib/db/client"
 
-export async function insertTicketsForOrder(
+export async function insertTicketForOrder(
   db: DbClient,
-  params: { drawId: string; outTradeNo: string; linuxdoUserId: string; numbers: string[] },
+  params: { drawId: string; outTradeNo: string; linuxdoUserId: string; number: string; ticketCount: number },
 ) {
-  if (params.numbers.length === 0) return
-  await db.insert(tickets).values(
-    params.numbers.map((number) => ({
-      drawId: params.drawId,
-      outTradeNo: params.outTradeNo,
-      linuxdoUserId: params.linuxdoUserId,
-      number,
-    })),
-  )
+  if (params.ticketCount <= 0) return
+  await db.insert(tickets).values({
+    drawId: params.drawId,
+    outTradeNo: params.outTradeNo,
+    linuxdoUserId: params.linuxdoUserId,
+    number: params.number,
+    ticketCount: params.ticketCount,
+  })
 }
 
 export async function listTicketsByOrder(db: DbClient, outTradeNo: string) {

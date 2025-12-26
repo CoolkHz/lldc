@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     if (!body || typeof body !== "object") throw new HttpError(400, "请求体必须为 JSON 对象")
     const obj = body as Record<string, unknown>
     const ticketCount = Number(obj.ticketCount)
-    const numbers = obj.numbers
+    const number = obj.number
 
     const result = await createOrderAndRenderPayForm({
       req,
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         avatarUrl: user.avatarUrl,
       },
       ticketCount,
-      numbers,
+      number,
     })
 
     return html(result.html, { status: 200 })

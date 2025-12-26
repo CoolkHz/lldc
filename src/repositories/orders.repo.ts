@@ -1,9 +1,10 @@
-import { and, desc, eq, isNull, sql } from "drizzle-orm"
+import { and, desc, eq, gte, isNull, sql } from "drizzle-orm"
 
 import { orders } from "@/db/schema"
 import type { DbClient } from "@/lib/db/client"
+import { ORDER_EXPIRE_SECONDS } from "@/lib/lottery/order"
 
-export type OrderStatus = "pending" | "paid"
+export type OrderStatus = "pending" | "paid" | "canceled"
 
 export async function createOrder(
   db: DbClient,
@@ -16,7 +17,7 @@ export async function createOrder(
     ticketCount: number
     unitPricePoints: number
     moneyPoints: number
-    numbersJson: string
+    number: string
   },
 ) {
   await db.insert(orders).values({
@@ -29,7 +30,7 @@ export async function createOrder(
     ticketCount: params.ticketCount,
     unitPricePoints: params.unitPricePoints,
     moneyPoints: params.moneyPoints,
-    numbersJson: params.numbersJson,
+    number: params.number,
     status: "pending",
     bonusPoints: 0,
     createdAt: sql`unixepoch()`,
@@ -49,6 +50,7 @@ export async function markOrderPaidIfPending(
   db: DbClient,
   params: { outTradeNo: string; tradeNo: string; paidAtUnixSeconds: number },
 ) {
+  const notExpiredCutoff = params.paidAtUnixSeconds - ORDER_EXPIRE_SECONDS
   return await db
     .update(orders)
     .set({
@@ -62,6 +64,7 @@ export async function markOrderPaidIfPending(
         eq(orders.outTradeNo, params.outTradeNo),
         eq(orders.status, "pending"),
         isNull(orders.paidAt),
+        gte(orders.createdAt, notExpiredCutoff),
       ),
     )
 }

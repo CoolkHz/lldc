@@ -78,7 +78,7 @@ export const orders = sqliteTable(
         unitPricePoints: integer("unit_price_points").notNull().default(10),
         moneyPoints: integer("money_points").notNull(),
 
-        numbersJson: text("numbers_json").notNull(),
+        number: text("number").notNull().default("0"),
 
         status: text("status").notNull(),
 
@@ -114,6 +114,7 @@ export const tickets = sqliteTable(
             .references(() => users.linuxdoUserId, { onDelete: "restrict" }),
 
         number: text("number").notNull(),
+        ticketCount: integer("ticket_count").notNull().default(1),
 
         prizeTier: integer("prize_tier").notNull().default(0),
         payoutPoints: integer("payout_points").notNull().default(0),

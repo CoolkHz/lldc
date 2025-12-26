@@ -73,6 +73,7 @@ export async function runDraw(params: { db: DbClient; kv: KVNamespace; config: A
         .select({
           id: tickets.id,
           number: tickets.number,
+          ticketCount: tickets.ticketCount,
           outTradeNo: tickets.outTradeNo,
           linuxdoUserId: tickets.linuxdoUserId,
         })
@@ -81,7 +82,7 @@ export async function runDraw(params: { db: DbClient; kv: KVNamespace; config: A
         .orderBy(asc(tickets.id))
         .all()
 
-      const ticketMaterial = ticketRows.map((t) => `${t.id}:${t.number}`).join("|")
+      const ticketMaterial = ticketRows.map((t) => `${t.id}:${t.number}:${t.ticketCount}`).join("|")
       const ticketsHash = await sha256Hex(ticketMaterial)
 
       const seedReveal = latest.seedPending
@@ -99,17 +100,18 @@ export async function runDraw(params: { db: DbClient; kv: KVNamespace; config: A
         tier: getPrizeTier(t.number, winning),
       }))
 
+      const sumTierTicketCount = (tier: number) => tiers.reduce((sum, t) => (t.tier === tier ? sum + t.ticketCount : sum), 0)
       const winnerCounts = {
-        p1: tiers.filter((t) => t.tier === 1).length,
-        p2: tiers.filter((t) => t.tier === 2).length,
-        p3: tiers.filter((t) => t.tier === 3).length,
+        p1: sumTierTicketCount(1),
+        p2: sumTierTicketCount(2),
+        p3: sumTierTicketCount(3),
       }
       const tierPayout = calculateTierPayouts({
         pools: { p1: pool.p1Points, p2: pool.p2Points, p3: pool.p3Points },
         winnerCounts,
       })
 
-      // 先清空（防止中途失败重试导致残留），再按 tier 写入固定 per 值。
+      // 先清空（防止中途失败重试导致残留），再按 tier 写入总奖金（per * ticketCount）。
       await (tx as unknown as DbClient)
         .update(tickets)
         .set({ prizeTier: 0, payoutPoints: 0 })
@@ -118,13 +120,13 @@ export async function runDraw(params: { db: DbClient; kv: KVNamespace; config: A
       if (tierPayout.p1.perPoints > 0) {
         await (tx as unknown as DbClient)
           .update(tickets)
-          .set({ prizeTier: 1, payoutPoints: tierPayout.p1.perPoints })
+          .set({ prizeTier: 1, payoutPoints: sql<number>`${tierPayout.p1.perPoints} * ${tickets.ticketCount}` })
           .where(sql`${tickets.drawId} = ${drawId} AND ${tickets.number} = ${winning}`)
       }
       if (tierPayout.p2.perPoints > 0) {
         await (tx as unknown as DbClient)
           .update(tickets)
-          .set({ prizeTier: 2, payoutPoints: tierPayout.p2.perPoints })
+          .set({ prizeTier: 2, payoutPoints: sql<number>`${tierPayout.p2.perPoints} * ${tickets.ticketCount}` })
           .where(
             sql`${tickets.drawId} = ${drawId} AND substr(${tickets.number}, 2) = substr(${winning}, 2) AND ${tickets.number} != ${winning}`,
           )
@@ -132,7 +134,7 @@ export async function runDraw(params: { db: DbClient; kv: KVNamespace; config: A
       if (tierPayout.p3.perPoints > 0) {
         await (tx as unknown as DbClient)
           .update(tickets)
-          .set({ prizeTier: 3, payoutPoints: tierPayout.p3.perPoints })
+          .set({ prizeTier: 3, payoutPoints: sql<number>`${tierPayout.p3.perPoints} * ${tickets.ticketCount}` })
           .where(
             sql`${tickets.drawId} = ${drawId} AND substr(${tickets.number}, 3) = substr(${winning}, 3) AND substr(${tickets.number}, 2) != substr(${winning}, 2)`,
           )
@@ -141,8 +143,9 @@ export async function runDraw(params: { db: DbClient; kv: KVNamespace; config: A
       // 插入 payouts（pending）
       const payoutRows = tiers
         .map((t) => {
-          const amountPoints =
+          const perPoints =
             t.tier === 1 ? tierPayout.p1.perPoints : t.tier === 2 ? tierPayout.p2.perPoints : t.tier === 3 ? tierPayout.p3.perPoints : 0
+          const amountPoints = perPoints * t.ticketCount
           if (t.tier === 0 || amountPoints <= 0) return null
           return {
             drawId,
@@ -227,7 +230,7 @@ export async function runDraw(params: { db: DbClient; kv: KVNamespace; config: A
     const counts = await params.db
       .select({
         tier: tickets.prizeTier,
-        count: sql<number>`count(*)`,
+        count: sql<number>`coalesce(sum(${tickets.ticketCount}), 0)`,
       })
       .from(tickets)
       .where(eq(tickets.drawId, drawId))

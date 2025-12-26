@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -13,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { fetchJson } from "@/lib/client/fetch-json"
 import { formatTaipei } from "@/lib/lottery/format"
+import { randomTicketNumber } from "@/lib/lottery/random"
 import { statusBadgeVariant, statusLabel } from "@/lib/lottery/status"
 import { getCurrentDrawId } from "@/lib/lottery/time"
 
@@ -58,6 +60,7 @@ function nicknameFallback(nickname: string): string {
 
 export function LotteryDashboard() {
   const [ticketCount, setTicketCount] = React.useState<number>(1)
+  const [ticketNumber, setTicketNumber] = React.useState<string>("")
   const [submitting, setSubmitting] = React.useState(false)
 
   const [dashboard, setDashboard] = React.useState<DashboardResponse | null>(null)
@@ -101,6 +104,10 @@ export function LotteryDashboard() {
       setError("注数过大（最大 200）")
       return
     }
+    if (!/^\d{4}$/.test(ticketNumber)) {
+      setError("号码必须为 4 位数字（0000-9999）")
+      return
+    }
 
     setSubmitting(true)
     setError(null)
@@ -109,7 +116,7 @@ export function LotteryDashboard() {
         method: "POST",
         credentials: "include",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ticketCount: count }),
+        body: JSON.stringify({ ticketCount: count, number: ticketNumber }),
       })
       if (res.status === 401) {
         window.location.replace("/login")
@@ -255,11 +262,37 @@ export function LotteryDashboard() {
                 value={String(ticketCount)}
                 onChange={(e) => setTicketCount(Number(e.target.value))}
               />
+              <div className="flex items-end gap-2">
+                <div className="flex flex-col gap-2">
+                  <Label>号码</Label>
+                  <InputOTP
+                    maxLength={4}
+                    inputMode="numeric"
+                    value={ticketNumber}
+                    onChange={(v) => setTicketNumber(v.replace(/\D/g, "").slice(0, 4))}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setTicketNumber(randomTicketNumber())}
+                  disabled={submitting}
+                >
+                  随机
+                </Button>
+              </div>
               <div className="text-muted-foreground text-xs">
-                号码默认随机生成；支付成功后回调才会确认下注并生成彩票。
+                号码需手动输入或点击随机；支付成功后回调才会确认下注并生成彩票。
               </div>
             </div>
-            <Button className="w-full" onClick={submitOrder} disabled={submitting}>
+            <Button className="w-full" onClick={submitOrder} disabled={submitting || !/^\d{4}$/.test(ticketNumber)}>
               {submitting ? "正在生成支付单..." : "去支付"}
             </Button>
           </CardContent>
