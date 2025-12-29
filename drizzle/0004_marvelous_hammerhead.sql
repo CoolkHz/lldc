@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `uq_payouts_draw_ticket` ON `payouts` (`draw_id`,`ticket_id`);

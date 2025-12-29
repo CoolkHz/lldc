@@ -14,6 +14,6 @@ export async function insertPayouts(
   }>,
 ) {
   if (rows.length === 0) return
-  await db.insert(payouts).values(rows)
+  await db.insert(payouts).values(rows).onConflictDoNothing()
 }
 

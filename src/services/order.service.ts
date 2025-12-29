@@ -3,7 +3,8 @@ import type { AppConfig } from "@/lib/env"
 import type { DbClient } from "@/lib/db/client"
 import { buildEpayFields, renderAutoSubmitForm } from "@/lib/credit/epay"
 import { verifyMd5Lower } from "@/lib/credit/sign"
-import { getCurrentDrawId } from "@/lib/lottery/time"
+import { ORDER_EXPIRE_SECONDS } from "@/lib/lottery/order"
+import { getCurrentDrawId, getSalesWindowUtcSeconds } from "@/lib/lottery/time"
 import { randomOutTradeNo } from "@/lib/lottery/random"
 import { addAuditEvent } from "@/repositories/audit.repo"
 import { createOrder, getOrderByOutTradeNo, markOrderPaidIfPending } from "@/repositories/orders.repo"
@@ -36,6 +37,12 @@ export async function createOrderAndRenderPayForm(params: {
   }
 
   const drawId = getCurrentDrawId()
+  const { salesEndTs } = getSalesWindowUtcSeconds(drawId)
+  const now = Math.floor(Date.now() / 1000)
+  const cutoff = salesEndTs - ORDER_EXPIRE_SECONDS
+  if (now > cutoff) {
+    throw new HttpError(400, "已停止下注，请 08:00 后再来")
+  }
   await ensureDraw(params.db, drawId)
 
   const number = parseTicketNumber(params.number)
@@ -106,9 +113,6 @@ export async function handleCreditNotify(params: {
   const tradeStatus = payload.trade_status
   const sign = payload.sign
   const signType = payload.sign_type
-  console.info(pid)
-  console.info(sign)
-
   try {
     if (!pid || !tradeNo || !outTradeNo || !money || !tradeStatus || !sign || !signType) {
       throw new HttpError(400, "回调参数缺失")

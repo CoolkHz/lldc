@@ -160,6 +160,7 @@ export const payouts = sqliteTable(
         paidAt: integer("paid_at"),
     },
     (t) => [
+        uniqueIndex("uq_payouts_draw_ticket").on(t.drawId, t.ticketId),
         index("idx_payouts_draw").on(t.drawId),
         index("idx_payouts_user").on(t.linuxdoUserId),
         index("idx_payouts_status").on(t.status),

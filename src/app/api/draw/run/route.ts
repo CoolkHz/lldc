@@ -10,7 +10,11 @@ export async function POST(req: Request) {
     if (!token || token !== config.drawRunToken) throw new HttpError(401, "未授权")
 
     const url = new URL(req.url)
-    const drawId = url.searchParams.get("drawId") ?? undefined
+    const rawDrawId = url.searchParams.get("drawId")
+    const drawId = rawDrawId?.trim() ? rawDrawId.trim() : undefined
+    if (drawId && !/^\d{4}-\d{2}-\d{2}$/.test(drawId)) {
+      throw new HttpError(400, "drawId 格式错误（期望 YYYY-MM-DD）")
+    }
 
     const result = await runDraw({ db, kv, config, drawId })
     if (result.status === "closing") {
