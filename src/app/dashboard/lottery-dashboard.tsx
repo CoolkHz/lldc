@@ -17,6 +17,12 @@ import { formatTaipei } from "@/lib/lottery/format"
 import { randomTicketNumber } from "@/lib/lottery/random"
 import { statusBadgeVariant, statusLabel } from "@/lib/lottery/status"
 import { getCurrentDrawId } from "@/lib/lottery/time"
+import {
+  IconButton,
+  type IconButtonProps,
+} from '@/components/animate-ui/components/buttons/icon';
+import { RotateCw } from "@/components/animate-ui/icons/rotate-cw"
+import { AnimateIcon } from "@/components/animate-ui/icons/icon"
 
 type DashboardResponse = {
   drawId: string
@@ -273,20 +279,28 @@ export function LotteryDashboard() {
                   >
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
+                    </InputOTPGroup>
+                    <InputOTPGroup>
                       <InputOTPSlot index={1} />
+                    </InputOTPGroup>
+                    <InputOTPGroup>
                       <InputOTPSlot index={2} />
+                    </InputOTPGroup>
+                    <InputOTPGroup>
                       <InputOTPSlot index={3} />
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <Button
+                <IconButton
                   type="button"
                   variant="secondary"
                   onClick={() => setTicketNumber(randomTicketNumber())}
                   disabled={submitting}
                 >
-                  随机
-                </Button>
+                  <AnimateIcon animateOnHover>
+                    <RotateCw />
+                  </AnimateIcon>
+                </IconButton>
               </div>
               <div className="text-muted-foreground text-xs">
                 号码需手动输入或点击随机；支付成功后回调才会确认下注并生成彩票。
