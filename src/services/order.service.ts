@@ -7,7 +7,7 @@ import { getCurrentDrawId } from "@/lib/lottery/time"
 import { randomOutTradeNo } from "@/lib/lottery/random"
 import { addAuditEvent } from "@/repositories/audit.repo"
 import { createOrder, getOrderByOutTradeNo, markOrderPaidIfPending } from "@/repositories/orders.repo"
-import { insertTicketForOrder } from "@/repositories/tickets.repo"
+import { ensureTicketForOrder } from "@/repositories/tickets.repo"
 import { ensureDraw, invalidateLotteryCaches } from "@/services/draw.service"
 
 const UNIT_PRICE_POINTS = 10
@@ -123,53 +123,77 @@ export async function handleCreditNotify(params: {
     }
 
     const paidAt = Math.floor(Date.now() / 1000)
-    const result = await params.db.transaction(async (tx) => {
-      const order = await getOrderByOutTradeNo(tx as unknown as DbClient, outTradeNo)
-      if (!order) throw new HttpError(404, "订单不存在")
 
-      const moneyInt = Number(money)
-      if (!Number.isFinite(moneyInt) || moneyInt !== order.moneyPoints) {
-        throw new HttpError(400, "money 与订单不一致")
-      }
+    const order = await getOrderByOutTradeNo(params.db, outTradeNo)
+    if (!order) throw new HttpError(404, "订单不存在")
 
-      if (order.status === "paid") {
-        return { updated: false, alreadyPaid: true, drawId: order.drawId }
-      }
-
-      // 幂等点：条件更新成功才插入 tickets；若更新行数=0，视为失败（或已 paid）；避免重复插票。
-      const updateResult = await markOrderPaidIfPending(tx as unknown as DbClient, {
-        outTradeNo,
-        tradeNo,
-        paidAtUnixSeconds: paidAt,
-      })
-      const updated = getD1Changes(updateResult) === 1
-      if (!updated) throw new HttpError(409, "订单状态更新失败")
-
-      if (!/^\d{4}$/.test(order.number)) throw new HttpError(500, "订单 number 异常")
-      if (!Number.isInteger(order.ticketCount) || order.ticketCount <= 0) throw new HttpError(500, "订单 ticketCount 异常")
-
-      await insertTicketForOrder(tx as unknown as DbClient, {
-        drawId: order.drawId,
-        outTradeNo,
-        linuxdoUserId: order.linuxdoUserId,
-        number: order.number,
-        ticketCount: order.ticketCount,
-      })
-
-      await addAuditEvent(tx as unknown as DbClient, {
-        type: "credit.notify_paid",
-        refId: outTradeNo,
-        payload: { outTradeNo, tradeNo, moneyPoints: order.moneyPoints },
-      })
-
-      return { updated: true, alreadyPaid: false, drawId: order.drawId }
-    })
-
-    if (result.updated) {
-      await invalidateLotteryCaches(params.kv, params.config, result.drawId)
+    const moneyInt = Number(money)
+    if (!Number.isFinite(moneyInt) || moneyInt !== order.moneyPoints) {
+      throw new HttpError(400, "money 与订单不一致")
     }
 
-    return { outTradeNo, updated: result.updated, alreadyPaid: result.alreadyPaid }
+    const ensureTicketsIfMissing = async (targetOrder: typeof order) => {
+      if (!/^\d{4}$/.test(targetOrder.number)) throw new HttpError(500, "订单 number 异常")
+      if (!Number.isInteger(targetOrder.ticketCount) || targetOrder.ticketCount <= 0) throw new HttpError(500, "订单 ticketCount 异常")
+
+      const { inserted } = await ensureTicketForOrder(params.db, {
+        drawId: targetOrder.drawId,
+        outTradeNo,
+        linuxdoUserId: targetOrder.linuxdoUserId,
+        number: targetOrder.number,
+        ticketCount: targetOrder.ticketCount,
+      })
+
+      if (inserted) {
+        await addAuditEvent(params.db, {
+          type: "credit.notify_ticket_repaired",
+          refId: outTradeNo,
+          payload: { outTradeNo, tradeNo },
+        })
+      }
+
+      return { inserted }
+    }
+
+    if (order.status === "paid") {
+      const { inserted } = await ensureTicketsIfMissing(order)
+      if (inserted) {
+        await invalidateLotteryCaches(params.kv, params.config, order.drawId)
+      }
+      return { outTradeNo, updated: false, alreadyPaid: true }
+    }
+
+    // 幂等点：条件更新成功才插入 tickets；若更新行数=0，重查订单判断是否已 paid 或返回失败。
+    const updateResult = await markOrderPaidIfPending(params.db, {
+      outTradeNo,
+      tradeNo,
+      paidAtUnixSeconds: paidAt,
+    })
+    const updated = getD1Changes(updateResult) === 1
+
+    if (!updated) {
+      const latest = await getOrderByOutTradeNo(params.db, outTradeNo)
+      if (latest?.status === "paid") {
+        const { inserted } = await ensureTicketsIfMissing(latest)
+        if (inserted) {
+          await invalidateLotteryCaches(params.kv, params.config, latest.drawId)
+        }
+        return { outTradeNo, updated: false, alreadyPaid: true }
+      }
+      throw new HttpError(409, "订单状态更新失败")
+    }
+
+    await ensureTicketsIfMissing(order)
+
+    await addAuditEvent(params.db, {
+      type: "credit.notify_paid",
+      refId: outTradeNo,
+      payload: { outTradeNo, tradeNo, moneyPoints: order.moneyPoints },
+    })
+
+    await invalidateLotteryCaches(params.kv, params.config, order.drawId)
+
+    return { outTradeNo, updated: true, alreadyPaid: false }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     try {

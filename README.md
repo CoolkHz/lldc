@@ -234,8 +234,8 @@ LinuxDO Credit 文档中提到的 `api.php` 查询与退款能力（通常要求
 
 ## 事务与幂等保证
 
-- `GET /api/credit/notify`：即使发生异常也始终返回 HTTP200 `success`，避免对方重试风暴；同时写入 `audit_events(type="credit_notify_error")` 记录失败原因。
-- notify 事务：`orders(pending->paid)` + `tickets` 插入（严格使用 `orders.numbers_json` 快照号码）+ 成功审计，在同一 D1 事务内提交；若条件更新行数=0（已 paid）则直接幂等返回，不会重复插票。
+- `GET /api/credit/notify`：成功返回 HTTP200 `success`；失败返回对应 HTTP 错误码；同时写入 `audit_events(type="credit_notify_error")` 记录失败原因。
+- notify 幂等：`orders(pending->paid)` 条件更新成功后才插入 `tickets`；若更新行数=0 则重查订单判断是否已 `paid` 并进行幂等返回；同时 `tickets` 插入为“若不存在则插入”，避免重复插票，也允许在“已 paid 但 tickets 缺失”时自愈。
 - `POST /api/draw/run`：先抢 `open -> closing` 锁；抢锁失败时
   - 已开奖（drawn）：返回已有 `winning`（幂等）
   - 正在开奖（closing）：返回 HTTP202
