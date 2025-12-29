@@ -122,6 +122,7 @@ export const tickets = sqliteTable(
         createdAt: integer("created_at").notNull().default(sql`unixepoch()`),
     },
     (t) => [
+        uniqueIndex("uq_tickets_out_trade_no").on(t.outTradeNo),
         index("idx_tickets_draw").on(t.drawId),
         index("idx_tickets_order").on(t.outTradeNo),
         index("idx_tickets_user").on(t.linuxdoUserId),

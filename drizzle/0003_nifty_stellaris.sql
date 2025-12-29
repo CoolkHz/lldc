@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `uq_tickets_out_trade_no` ON `tickets` (`out_trade_no`);
