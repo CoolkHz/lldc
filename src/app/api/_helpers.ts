@@ -100,6 +100,7 @@ export function errorToResponse(error: unknown) {
     if (error.status >= 500) {
       console.error("[api] HttpError>=500", { status: error.status, code: error.code, message: error.message, cause: error.cause })
     }
+    console.error(error.message)
     return json({ error: toPublicErrorMessage(error), code: toPublicErrorCode(error) }, { status: error.status })
   }
   const classified = classifyNonHttpError(error)

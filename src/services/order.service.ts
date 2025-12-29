@@ -106,6 +106,8 @@ export async function handleCreditNotify(params: {
   const tradeStatus = payload.trade_status
   const sign = payload.sign
   const signType = payload.sign_type
+  console.info(pid)
+  console.info(sign)
 
   try {
     if (!pid || !tradeNo || !outTradeNo || !money || !tradeStatus || !sign || !signType) {
